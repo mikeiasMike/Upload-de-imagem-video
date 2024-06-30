@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload de Vídeos/Imagens</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .upload-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .upload-container h1 {
+            margin-bottom: 20px;
+        }
+        .upload-container input[type="file"] {
+            margin-bottom: 20px;
+        }
+        .upload-container button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007BFF;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .upload-container button:hover {
+            background-color: #0056b3;
+        }
+        .queue-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .queue-item {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h1>Upload de Vídeos/Imagens</h1>
+        <input type="file" id="fileInput" accept="image/*,video/*" multiple>
+        <button onclick="addToQueue()">Adicionar à Fila</button>
+    </div>
+    <div class="queue-container" id="queueContainer">
+        <!-- Itens da fila serão adicionados aqui -->
+    </div>
+
+    <script>
+        const queue = [];
+        let currentIndex = 0;
+
+        function addToQueue() {
+            const fileInput = document.getElementById('fileInput');
+            const files = fileInput.files;
+
+            for (let i = 0; i < files.length; i++) {
+                queue.push(files[i]);
+                const queueItem = document.createElement('div');
+                queueItem.classList.add('queue-item');
+                queueItem.textContent = files[i].name;
+                document.getElementById('queueContainer').appendChild(queueItem);
+            }
+
+            fileInput.value = ''; // Limpa o input
+            processQueue();
+        }
+
+        function processQueue() {
+            if (currentIndex < queue.length) {
+                const file = queue[currentIndex];
+                const url = URL.createObjectURL(file);
+
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.style.maxWidth = '90%';
+                    img.style.maxHeight = '90%';
+                    document.body.appendChild(img);
+
+                    setTimeout(() => {
+                        document.body.removeChild(img);
+                        currentIndex++;
+                        processQueue();
+                    }, 5000); // 5 segundos
+                } else if (file.type.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.src = url;
+                    video.controls = true;
+                    document.body.appendChild(video);
+
+                    video.onended = () => {
+                        document.body.removeChild(video);
+                        currentIndex++;
+                        processQueue();
+                    };
+
+                    video.play();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
